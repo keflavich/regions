@@ -1,6 +1,8 @@
 from astropy import units as u
 import os
 import re
+#from .. import circle
+from regions import circle
 
 from astropy.extern.ply import lex,yacc
 
@@ -111,8 +113,9 @@ def p_size_something(t):
 def p_error(t):
     print("Syntax error at '%s'" % t.value)
 
-parser = yacc.yacc()
+parser = yacc.yacc(optimize=True)
 
 def parse(string):
-    parser.parse(string)
-    return names, coordinates
+    name, coordinates = parser.parse(string)
+    return circle.CircularRegion(coordinates[:2], coordinates[2])
+    #return names, coordinates
