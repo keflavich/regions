@@ -271,7 +271,7 @@ class DS9Parser(object):
                                        " region has been found.")
         else:
             helper = DS9RegionParser(self.coordsys, region_type,
-                                     self.global_meta, line)
+                                     self.global_meta, line.strip())
             helper.parse()
             self.shapes.append(helper.shape)
 
