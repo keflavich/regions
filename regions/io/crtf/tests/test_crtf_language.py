@@ -7,7 +7,7 @@ from astropy.utils.data import get_pkg_data_filename
 
 from astropy import coordinates, units as u
 
-from ..read import CRTFParser, read_crtf
+from ..read import CRTFParser, read_crtf, regex_line
 from ..write import crtf_objects_to_string
 from ..core import CRTFRegionParserError
 
@@ -158,3 +158,16 @@ def test_file_crtf(filename):
 
     for split_line in desired_lines:
         assert split_line in actual_lines
+
+def test_casa_file_crtf():
+    filename = get_pkg_data_filename('data/CRTF_CARTA.crtf')
+    regs = read_crtf(filename)
+    assert len(regs) == 2
+
+def test_space_after_regname():
+    """
+    Regression test for #271: space is allowed
+    """
+    reg_str = 'ellipse [[18h12m24s, -23d11m00s], 2.3arcsec]'
+
+    assert regex_line.search(reg_str) is not None

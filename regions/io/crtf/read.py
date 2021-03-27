@@ -13,7 +13,7 @@ from ..core import Shape, ShapeList, reg_mapping
 __all__ = ['read_crtf', 'CRTFParser', 'CRTFRegionParser']
 
 # All CASA files start with '#CRTF' . It may also include the version number like '#CRTFv0' .
-regex_begin = re.compile(r'^#CRTFv?[\d]?$')
+regex_begin = re.compile(r'^#CRTFv?[\d]?')
 
 # Comment Format :
 regex_comment = re.compile(r'^#.*$')
@@ -32,10 +32,10 @@ regex_meta = re.compile(r'(?:(\w+)\s*=[\s\'\"]*([^,\[\]]+?)[\'\",]+)|(?:(\w+)\s*
 
 # Region format which segregates include('+'|'-') parameter, kind of definition ('ann' for annotations | '' for regions)
 # and region type.
-regex_region = re.compile(r'(?P<include>[+-])?(?P<type>ann(?=\s))?\s*(?P<regiontype>[a-z]*?)\[[^=]*]')
+regex_region = re.compile(r'(?P<include>[+-])?(?P<type>ann(?=\s))?\s*(?P<regiontype>[a-z]*?)\s?\[[^=]*]')
 
 # Line format which checks the validity of the line and segregates the meta attributes from the region format.
-regex_line = re.compile(r'(?P<region>[+-]?(?:ann(?=\s))?\s*[a-z]+?\[[^=]+\])(?:\s*[,]\s*(?P<parameters>.*))?')
+regex_line = re.compile(r'(?P<region>[+-]?(?:ann(?=\s))?\s*[a-z]+?\s?\[[^=]+\])(?:\s*[,]\s*(?P<parameters>.*))?')
 
 
 def read_crtf(filename, errors='strict'):
@@ -331,9 +331,10 @@ class CRTFRegionParser:
         if self.region_type == 'poly':
             if len(coord_list_str) < 4:
                 self._raise_error(f'Not in proper format: {self.reg_str} polygon should have > 4 coordinates')
-            if coord_list_str[0] != coord_list_str[-1]:
-                self._raise_error("Not in proper format: '{}', "
-                                  "In polygon, the last and first coordinates should be same".format(self.reg_str))
+            # The coordinate specification does not require this.
+            # if coord_list_str[0] != coord_list_str[-1]:
+            #     self._raise_error("Not in proper format: '{}', "
+            #                       "In polygon, the last and first coordinates should be same".format(self.reg_str))
         else:
             if len(coord_list_str) != len(self.language_spec[self.region_type]):
                 self._raise_error("Not in proper format: '{}', "
@@ -368,7 +369,7 @@ class CRTFRegionParser:
                 elif self.region_type == 'text':
                     self.meta['text'] = val_str[1:-1]
 
-        self.coord = coord_list
+        self.coord = u.Quantity(coord_list)
 
     def convert_meta(self):
         """
