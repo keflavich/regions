@@ -158,3 +158,7 @@ def test_file_crtf(filename):
 
     for split_line in desired_lines:
         assert split_line in actual_lines
+
+def test_casa_file_crtf():
+    filename = get_pkg_data_filename('CRTF_CARTA.crtf')
+    regs = read_crtf(filename, 'warn')
